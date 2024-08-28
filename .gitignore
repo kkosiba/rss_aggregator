@@ -3,3 +3,6 @@
 # Project binary
 rss_aggregator
 
+# Vendor code
+vendor/
+
