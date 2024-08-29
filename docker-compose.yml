@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:latest
+    env_file: .env
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", $POSTGRES_DB, "-U", $POSTGRES_USER]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
+  
+  app:
+    build:
+      context: .
+      dockerfile: rss_aggregator.dockerfile
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
