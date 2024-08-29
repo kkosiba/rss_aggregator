@@ -7,7 +7,17 @@ import (
 	"strings"
 )
 
-var expectedEnvVars = []string{"HTTP_SERVER_PORT", "POSTGRES_HOST", "POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD"}
+var expectedEnvVars = []string{
+	// HTTP Server
+	"HTTP_SERVER_PORT",
+
+	// Database
+	"POSTGRES_HOST",
+	"POSTGRES_PORT",
+	"POSTGRES_DB",
+	"POSTGRES_USER",
+	"POSTGRES_PASSWORD",
+}
 
 func validateEnv() {
 	var errors []string
