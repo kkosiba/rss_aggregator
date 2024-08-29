@@ -4,6 +4,6 @@ func main() {
 	// Check if expected env vars are set
 	validateEnv()
 
-	// connectToDatabase()
+	connectToDatabase()
 	startServer()
 }
