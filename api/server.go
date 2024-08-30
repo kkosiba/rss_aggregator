@@ -1,16 +1,17 @@
-package main
+package api
 
 import (
 	"log"
 	"net/http"
 	"os"
 
+
 	// Third-party libraries
 	chi "github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 )
 
-func startServer() {
+func StartServer() {
 	httpServerPort := os.Getenv("HTTP_SERVER_PORT")
 
 	router := chi.NewRouter()

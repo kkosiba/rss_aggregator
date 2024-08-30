@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -19,7 +19,7 @@ var expectedEnvVars = []string{
 	"POSTGRES_PASSWORD",
 }
 
-func validateEnv() {
+func ValidateEnv() {
 	var errors []string
 	for _, envVar := range expectedEnvVars {
 		_, exists := os.LookupEnv(envVar)
