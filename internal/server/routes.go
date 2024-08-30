@@ -38,6 +38,11 @@ func (server *HTTPServer) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	connection, err := server.database.Connect()
+	if err != nil {
+		// We could consider app panic here if db connection can't be established
+		log.Print(err)
+		return
+	}
 	result := connection.Create(
 		&database.UserModel{CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC(), Name: jsonBody.Name},
 	)
