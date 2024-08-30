@@ -1,37 +1,29 @@
 package server
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 	"os"
 
-	// Third-party libraries
-	chi "github.com/go-chi/chi/v5"
-	"github.com/go-chi/cors"
+	"github.com/kkosiba/rss_aggregator/internal/database"
 )
 
-func StartServer() {
-	httpServerPort := os.Getenv("HTTP_SERVER_PORT")
+type HTTPServer struct {
+	port     string
+	database *database.Database
+}
 
-	router := chi.NewRouter()
-	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"https://*", "http://*"},
-		AllowedMethods: []string{"GET", "POST"},
-	}))
 
-	v1router := chi.NewRouter()
-	v1router.HandleFunc("/healthcheck", healthCheck)
-	v1router.HandleFunc("/users", createUser)
-	router.Mount("/v1", v1router)
-
-	log.Printf("Starting an HTTP server on port %v", httpServerPort)
-	server := &http.Server{
-		Handler: router,
-		Addr:    ":" + httpServerPort,
+func New() *http.Server {
+	database := database.New()
+	database.Migrate()
+	
+	httpServer := &HTTPServer{
+		port: os.Getenv("HTTP_SERVER_PORT"),
+		database: &database,
 	}
-
-	err := server.ListenAndServe()
-	if err != nil {
-		log.Fatal(err)
+	return &http.Server{
+		Handler: httpServer.RegisterRoutes(),
+		Addr:    fmt.Sprintf(":%s", httpServer.port),
 	}
 }
