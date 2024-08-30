@@ -13,13 +13,12 @@ type HTTPServer struct {
 	database *database.Database
 }
 
-
 func New() *http.Server {
 	database := database.New()
 	database.Migrate()
-	
+
 	httpServer := &HTTPServer{
-		port: os.Getenv("HTTP_SERVER_PORT"),
+		port:     os.Getenv("HTTP_SERVER_PORT"),
 		database: &database,
 	}
 	return &http.Server{
