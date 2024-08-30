@@ -17,11 +17,12 @@ func StartServer() {
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{"https://*", "http://*"},
-		AllowedMethods: []string{"GET"},
+		AllowedMethods: []string{"GET", "POST"},
 	}))
 
 	v1router := chi.NewRouter()
 	v1router.HandleFunc("/healthcheck", healthCheck)
+	v1router.HandleFunc("/users", createUser)
 	router.Mount("/v1", v1router)
 
 	log.Printf("Starting an HTTP server on port %v", httpServerPort)
