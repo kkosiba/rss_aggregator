@@ -1,7 +1,7 @@
 # Stage 1: build
 FROM golang:1.23-bookworm AS build
 
-WORKDIR /app 
+WORKDIR /app
 
 # Reduce build time by utilising Docker caching
 COPY go.mod go.sum ./
