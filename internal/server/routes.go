@@ -1,4 +1,4 @@
-package api
+package server
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kkosiba/rss_aggregator/db"
+	"github.com/kkosiba/rss_aggregator/internal/database"
 )
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +23,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	decoder := json.NewDecoder(r.Body)
-	var jsonBody struct{Name string}
+	var jsonBody struct{ Name string }
 	err := decoder.Decode(&jsonBody)
 	if err != nil {
 		msg := "Failed to decode JSON body"
@@ -32,9 +32,9 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	connection := db.ConnectToDatabase()
+	connection := database.ConnectToDatabase()
 	result := connection.Create(
-		&db.UserModel{CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC(), Name: jsonBody.Name},
+		&database.UserModel{CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC(), Name: jsonBody.Name},
 	)
 	if result.Error != nil {
 		msg := fmt.Sprintf("Failed to create user %s", jsonBody.Name)

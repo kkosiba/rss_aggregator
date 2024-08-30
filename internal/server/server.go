@@ -1,10 +1,9 @@
-package api
+package server
 
 import (
 	"log"
 	"net/http"
 	"os"
-
 
 	// Third-party libraries
 	chi "github.com/go-chi/chi/v5"
