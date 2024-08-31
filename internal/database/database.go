@@ -4,32 +4,21 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type Database struct {
-	user     string
-	password string
-	host     string
-	port     string
-	name     string
-}
-
-func New() Database {
-	return Database{
-		user:     os.Getenv("POSTGRES_USER"),
-		password: os.Getenv("POSTGRES_PASSWORD"),
-		host:     os.Getenv("POSTGRES_HOST"),
-		port:     os.Getenv("POSTGRES_PORT"),
-		name:     os.Getenv("POSTGRES_DB"),
-	}
+	User     string
+	Password string
+	Host     string
+	Port     string
+	Name     string
 }
 
 func (db *Database) buildConnectionURL() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", db.user, db.password, db.host, db.port, db.name)
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", db.User, db.Password, db.Host, db.Port, db.Name)
 }
 
 func (db *Database) Connect() (*gorm.DB, error) {
