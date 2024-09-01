@@ -21,7 +21,6 @@ func New() *http.Server {
 		Port:     os.Getenv("POSTGRES_PORT"),
 		Name:     os.Getenv("POSTGRES_DB"),
 	}
-	database.Migrate()
 
 	httpServer := &HTTPServer{
 		port:     os.Getenv("HTTP_SERVER_PORT"),

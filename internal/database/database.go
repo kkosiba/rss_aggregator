@@ -3,7 +3,6 @@ package database
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -28,15 +27,4 @@ func (db *Database) Connect() (*gorm.DB, error) {
 		return nil, errors.New("failed to connect to database")
 	}
 	return connection, nil
-}
-
-func (db *Database) Migrate() {
-	connection, err := db.Connect()
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = connection.AutoMigrate(&UserModel{})
-	if err != nil {
-		log.Fatalf("Failed to apply database migrations: %s", err)
-	}
 }

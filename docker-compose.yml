@@ -14,8 +14,8 @@ services:
     image: migrate/migrate
     env_file: .env
     volumes:
-      - internal/database/migrations:/migrations
-    command: ["-path", "/migrations", "-database", "postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@db:$POSTGRES_PORT/$POSTGRES_DB", "up"]
+      - ./internal/database/migrations:/migrations
+    command: ["-path", "/migrations", "-database", "postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@db:$POSTGRES_PORT/$POSTGRES_DB?sslmode=disable", "up"]
     depends_on:
       db:
         condition: service_healthy
