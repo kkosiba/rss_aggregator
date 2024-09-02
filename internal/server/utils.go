@@ -17,3 +17,14 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.WriteHeader(code)
 	w.Write(data)
 }
+
+func respondWithError(w http.ResponseWriter, errorCode int, errorMessagesToLog []string, errorMessagesToRender []string) {
+	data, _ := json.Marshal(map[string][]string{"errors": errorMessagesToRender})
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(errorCode)
+	w.Write(data)
+
+	for message := range errorMessagesToLog {
+		log.Printf("ERROR %s\n", message)
+	}
+}
