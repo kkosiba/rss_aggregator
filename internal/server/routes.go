@@ -1,10 +1,12 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -18,12 +20,40 @@ func (server *HTTPServer) RegisterRoutes() http.Handler {
 
 	router.Get("/healthcheck", server.healthCheck)
 	router.Post("/users", server.createUser)
+	router.Get("/users", server.getUser)
 	return router
 }
 
 func (server *HTTPServer) healthCheck(w http.ResponseWriter, r *http.Request) {
 	// Could check something useful here, but it's good enough for now
 	respondWithJSON(w, 200, struct{}{})
+}
+
+func (server *HTTPServer) getUser(w http.ResponseWriter, r *http.Request) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		message := "Authorization header is not set"
+		respondWithError(w, 401, []string{message}, []string{message})
+		return
+	}
+
+	// Strip redundant prefix
+	apiKey, _ := strings.CutPrefix(authHeader, "ApiKey ")
+
+	dbpool := server.database.Connect()
+	
+	var user database.UserModel
+	err := dbpool.QueryRow(
+		context.Background(),
+		"SELECT * FROM users WHERE api_key = $1", apiKey,
+	).Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.ApiKey)
+
+	if err != nil {
+		baseMessage := "Failed to retrieve user"
+		respondWithError(w, 400, []string{fmt.Sprintf("%s. Error: %s", baseMessage, err)}, []string{baseMessage})
+		return
+	}
+	respondWithJSON(w, 200, &user)
 }
 
 func (server *HTTPServer) createUser(w http.ResponseWriter, r *http.Request) {

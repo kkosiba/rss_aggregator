@@ -1,11 +1,11 @@
 package database
 
 import (
-	"errors"
+	"context"
 	"fmt"
+	"log"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Database struct {
@@ -20,11 +20,12 @@ func (db *Database) buildConnectionURL() string {
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", db.User, db.Password, db.Host, db.Port, db.Name)
 }
 
-func (db *Database) Connect() (*gorm.DB, error) {
+func (db *Database) Connect() *pgxpool.Pool {
 	connectionURL := db.buildConnectionURL()
-	connection, err := gorm.Open(postgres.Open(connectionURL), &gorm.Config{})
+	dbpool, err := pgxpool.New(context.Background(), connectionURL)
 	if err != nil {
-		return nil, errors.New("failed to connect to database")
+		log.Fatalf("Unable to create connection pool: %v\n", err)
 	}
-	return connection, nil
+	defer dbpool.Close()
+	return dbpool
 }
