@@ -63,7 +63,7 @@ func (server *HTTPServer) createUser(w http.ResponseWriter, r *http.Request) {
 	var jsonBody struct{ Name string }
 	err := decoder.Decode(&jsonBody)
 	if err != nil {
-		baseMessage := "Faled to decode JSON body"
+		baseMessage := "Failed to decode JSON body"
 		respondWithError(w, 400, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
 		return
 	}
@@ -80,7 +80,7 @@ func (server *HTTPServer) createUser(w http.ResponseWriter, r *http.Request) {
 			time.Now().UTC(), time.Now().UTC(), jsonBody.Name, apiKey,
 		)
 		if err != nil {
-			baseMessage := fmt.Sprintf("Faled to create user '%s'", jsonBody.Name)
+			baseMessage := fmt.Sprintf("Failed to create user '%s'", jsonBody.Name)
 			respondWithError(w, 400, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
 			return
 		}
