@@ -69,6 +69,7 @@ func (server *HTTPServer) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	connection := server.database.Connect()
+	defer connection.Close()
 
 	data := make([]byte, 10)
 	if _, err := rand.Read(data); err == nil {

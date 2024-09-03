@@ -26,6 +26,5 @@ func (db *Database) Connect() *pgxpool.Pool {
 	if err != nil {
 		log.Fatalf("Unable to create connection pool: %v\n", err)
 	}
-	defer dbpool.Close()
 	return dbpool
 }
