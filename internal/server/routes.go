@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -41,7 +43,7 @@ func (server *HTTPServer) getUser(w http.ResponseWriter, r *http.Request) {
 	apiKey, _ := strings.CutPrefix(authHeader, "ApiKey ")
 
 	dbpool := server.database.Connect()
-	
+
 	var user database.UserModel
 	err := dbpool.QueryRow(
 		context.Background(),
@@ -61,28 +63,33 @@ func (server *HTTPServer) createUser(w http.ResponseWriter, r *http.Request) {
 	var jsonBody struct{ Name string }
 	err := decoder.Decode(&jsonBody)
 	if err != nil {
-		msg := "Failed to decode JSON body"
-		respondWithJSON(w, 400, map[string]string{"error": msg})
-		log.Print(msg)
+		baseMessage := "Faled to decode JSON body"
+		respondWithError(w, 400, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
 		return
 	}
 
-	connection, err := server.database.Connect()
-	if err != nil {
-		// We could consider app panic here if db connection can't be established
-		log.Print(err)
-		return
-	}
-	result := connection.Create(
-		&database.UserModel{CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC(), Name: jsonBody.Name},
-	)
-	if result.Error != nil {
-		msg := fmt.Sprintf("Failed to create user %s", jsonBody.Name)
-		respondWithJSON(w, 400, map[string]string{"error": msg})
+	connection := server.database.Connect()
+
+	data := make([]byte, 10)
+	if _, err := rand.Read(data); err == nil {
+		apiKey := fmt.Sprintf("%x", sha256.Sum256(data))
+		_, err := connection.Query(
+			context.Background(),
+			"INSERT INTO users (created_at, updated_at, name, api_key) values ($1, $2, $3)",
+			time.Now().UTC(), time.Now().UTC(), jsonBody.Name, apiKey,
+		)
+		if err != nil {
+			baseMessage := fmt.Sprintf("Faled to create user '%s'", jsonBody.Name)
+			respondWithError(w, 400, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
+			return
+		}
+		msg := fmt.Sprintf("User '%s' created successfully", jsonBody.Name)
+		respondWithJSON(w, 200, map[string]string{"details": msg})
 		log.Print(msg)
 		return
+	} else {
+		baseMessage := "Failed to generate API key for user '%s'"
+		respondWithError(w, 500, []string{fmt.Sprintf("%s. Error: %s", baseMessage, err)}, []string{baseMessage})
+		return
 	}
-	msg := fmt.Sprintf("User %s created successfully", jsonBody.Name)
-	respondWithJSON(w, 200, map[string]string{"details": msg})
-	log.Print(msg)
 }
