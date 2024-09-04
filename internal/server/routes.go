@@ -42,10 +42,11 @@ func (server *HTTPServer) getUser(w http.ResponseWriter, r *http.Request) {
 	// Strip redundant prefix
 	apiKey, _ := strings.CutPrefix(authHeader, "ApiKey ")
 
-	dbpool := server.database.Connect()
+	connection := server.database.Connect()
+	defer connection.Close()
 
 	var user database.UserModel
-	err := dbpool.QueryRow(
+	err := connection.QueryRow(
 		context.Background(),
 		"SELECT * FROM users WHERE api_key = $1", apiKey,
 	).Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.ApiKey)
