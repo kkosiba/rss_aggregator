@@ -13,12 +13,15 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/render"
+	"github.com/google/uuid"
 	"github.com/kkosiba/rss_aggregator/internal/database"
 )
 
 func (server *HTTPServer) RegisterRoutes() http.Handler {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
+	router.Use(render.SetContentType(render.ContentTypeJSON))
 
 	router.Get("/healthcheck", server.healthCheck)
 	router.Post("/users", server.createUser)
