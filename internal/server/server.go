@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/render"
 	"github.com/kkosiba/rss_aggregator/internal/database"
 )
 
@@ -30,4 +33,22 @@ func New() *http.Server {
 		Handler: httpServer.RegisterRoutes(),
 		Addr:    fmt.Sprintf(":%s", httpServer.port),
 	}
+}
+
+func (server *HTTPServer) RegisterRoutes() http.Handler {
+	router := chi.NewRouter()
+
+	router.Use(middleware.Logger)
+	router.Use(middleware.CleanPath)
+	router.Use(render.SetContentType(render.ContentTypeJSON))
+	router.Use(middleware.RequestID)
+	router.Use(middleware.Recoverer)
+
+	// API v1
+	router.Route("/v1", func(r chi.Router) {
+		r.Mount("/healthcheck", healthcheckResource{}.Routes())
+		r.Mount("/users", usersResource{database: server.database}.Routes())
+	})
+
+	return router
 }
