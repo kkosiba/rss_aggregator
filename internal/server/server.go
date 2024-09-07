@@ -48,6 +48,7 @@ func (server *HTTPServer) RegisterRoutes() http.Handler {
 	router.Route("/v1", func(r chi.Router) {
 		r.Mount("/healthcheck", healthcheckResource{}.Routes())
 		r.Mount("/users", usersResource{database: server.database}.Routes())
+		r.Mount("/feeds", feedsResource{database: server.database}.Routes())
 	})
 
 	return router
