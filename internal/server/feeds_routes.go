@@ -41,8 +41,19 @@ func (rs feedsResource) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	connection := rs.database.Connect()
-	userName := "some user" // todo: this needs to be fetched from the users table, and the request needs to have API key for a given user
-	userId := "some value"  // same as above
+
+	var userId, userName string
+	err = connection.QueryRow(
+		context.Background(),
+		"SELECT id, name FROM users WHERE api_key = '%s'",
+		apiKey,
+	).Scan(&userId, &userName)
+	if err != nil {
+		baseMessage := fmt.Sprintf("Failed to retrieve user details")
+		respondWithError(w, http.StatusBadRequest, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
+		return
+	}
+
 	_, err = connection.Query(
 		context.Background(),
 		"INSERT INTO feeds (id, created_at, updated_at, name, url, user_id) values (gen_random_uuid(), $1, $2, $3, $4, $5)",
