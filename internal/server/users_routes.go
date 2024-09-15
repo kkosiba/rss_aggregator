@@ -37,7 +37,7 @@ func (rs usersResource) Create(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&jsonBody)
 	if err != nil {
 		baseMessage := "Failed to decode JSON body"
-		respondWithError(w, 400, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
+		respondWithError(w, http.StatusBadRequest, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
 		return
 	}
 
@@ -53,15 +53,15 @@ func (rs usersResource) Create(w http.ResponseWriter, r *http.Request) {
 		)
 		if err != nil {
 			baseMessage := fmt.Sprintf("Failed to create user '%s'", jsonBody.Name)
-			respondWithError(w, 400, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
+			respondWithError(w, http.StatusBadRequest, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
 			return
 		}
 		msg := fmt.Sprintf("User '%s' created successfully", jsonBody.Name)
-		respondWithJSON(w, 200, map[string]string{"details": msg})
+		respondWithJSON(w, http.StatusOK, map[string]string{"details": msg})
 		log.Print(msg)
 	} else {
 		baseMessage := "Failed to generate API key for user '%s'"
-		respondWithError(w, 500, []string{fmt.Sprintf("%s. Error: %s", baseMessage, err)}, []string{baseMessage})
+		respondWithError(w, http.StatusInternalServerError, []string{fmt.Sprintf("%s. Error: %s", baseMessage, err)}, []string{baseMessage})
 	}
 }
 
@@ -90,8 +90,8 @@ func (rs usersResource) Get(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		baseMessage := "Failed to retrieve user"
-		respondWithError(w, 400, []string{fmt.Sprintf("%s. Error: %s", baseMessage, err)}, []string{baseMessage})
+		respondWithError(w, http.StatusBadRequest, []string{fmt.Sprintf("%s. Error: %s", baseMessage, err)}, []string{baseMessage})
 		return
 	}
-	respondWithJSON(w, 200, &database.UserModel{ID: ID, CreatedAt: CreatedAt, UpdatedAt: UpdatedAt, Name: Name, ApiKey: ApiKey})
+	respondWithJSON(w, http.StatusOK, &database.UserModel{ID: ID, CreatedAt: CreatedAt, UpdatedAt: UpdatedAt, Name: Name, ApiKey: ApiKey})
 }

@@ -33,7 +33,9 @@ func (rs feedsResource) Create(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&jsonBody)
 	if err != nil {
 		baseMessage := "Failed to decode JSON body"
-		respondWithError(w, 400, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
+		respondWithError(w, http.StatusBadRequest, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
+		return
+	}
 	apiKey, err := extractApiKey(r.Header)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, []string{string(err.Error())}, []string{err.Error()})
@@ -61,10 +63,10 @@ func (rs feedsResource) Create(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		baseMessage := fmt.Sprintf("Failed to create feed '%s' with URL '%s'", jsonBody.Name, jsonBody.Url)
-		respondWithError(w, 400, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
+		respondWithError(w, http.StatusBadRequest, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
 		return
 	}
 	msg := fmt.Sprintf("Feed '%s' created successfully for user '%s'", jsonBody.Name, userName)
-	respondWithJSON(w, 200, map[string]string{"details": msg})
+	respondWithJSON(w, http.StatusOK, map[string]string{"details": msg})
 	log.Print(msg)
 }
