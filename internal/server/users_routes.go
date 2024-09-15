@@ -68,16 +68,11 @@ func (rs usersResource) Create(w http.ResponseWriter, r *http.Request) {
 // Defines a handler for GET /users to fetch user details.
 // This endpoint requires Authorization header to be set.
 func (rs usersResource) Get(w http.ResponseWriter, r *http.Request) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		message := "Authorization header is not set"
-		respondWithError(w, 401, []string{message}, []string{message})
+	apiKey, err := extractApiKey(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, []string{string(err.Error())}, []string{err.Error()})
 		return
 	}
-
-	// Strip redundant prefix
-	apiKey, _ := strings.CutPrefix(authHeader, "ApiKey ")
-	fmt.Println("apiKey:", apiKey)
 	connection := rs.database.Connect()
 
 	var (
@@ -88,7 +83,7 @@ func (rs usersResource) Get(w http.ResponseWriter, r *http.Request) {
 		ApiKey    string
 	)
 
-	err := connection.QueryRow(
+	err = connection.QueryRow(
 		context.Background(),
 		"SELECT id, created_at, updated_at, name, api_key FROM users WHERE api_key = $1", apiKey,
 	).Scan(&ID, &CreatedAt, &UpdatedAt, &Name, &ApiKey)

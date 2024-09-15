@@ -34,6 +34,9 @@ func (rs feedsResource) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		baseMessage := "Failed to decode JSON body"
 		respondWithError(w, 400, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
+	apiKey, err := extractApiKey(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, []string{string(err.Error())}, []string{err.Error()})
 		return
 	}
 
