@@ -48,7 +48,8 @@ func (server *HTTPServer) RegisterRoutes() http.Handler {
 	router.Route("/v1", func(r chi.Router) {
 		r.Mount("/healthcheck", healthcheckResource{}.Routes())
 		r.Mount("/users", usersResource{database: server.database}.Routes())
-		r.Mount("/feeds", feedsResource{database: server.database}.Routes())
+		// Add custom API key auth middleware to /feeds endpoints
+		r.With(ApiKeyAuth(server.database)).Mount("/feeds", feedsResource{database: server.database}.Routes())
 	})
 
 	return router
