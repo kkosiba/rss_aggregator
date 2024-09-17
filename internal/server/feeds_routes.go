@@ -44,14 +44,14 @@ func (rs feedsResource) Create(w http.ResponseWriter, r *http.Request) {
 
 	connection := rs.database.Connect()
 
-	var userId, userName string
+	var userId string
 	err = connection.QueryRow(
 		context.Background(),
-		"SELECT id, name FROM users WHERE api_key = '%s'",
+		"SELECT id FROM users WHERE api_key = $1",
 		apiKey,
-	).Scan(&userId, &userName)
+	).Scan(&userId)
 	if err != nil {
-		baseMessage := fmt.Sprintf("Failed to retrieve user details")
+		baseMessage := fmt.Sprintf("Failed to retrieve user ID")
 		respondWithError(w, http.StatusBadRequest, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
 		return
 	}
@@ -66,7 +66,7 @@ func (rs feedsResource) Create(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
 		return
 	}
-	msg := fmt.Sprintf("Feed '%s' created successfully for user '%s'", jsonBody.Name, userName)
+	msg := fmt.Sprintf("Feed '%s' created successfully", jsonBody.Name)
 	respondWithJSON(w, http.StatusOK, map[string]string{"details": msg})
 	log.Print(msg)
 }
