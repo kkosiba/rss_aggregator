@@ -53,7 +53,12 @@ func (rs feedsResource) Create(w http.ResponseWriter, r *http.Request) {
 	).Scan(&userId)
 	if err != nil {
 		baseMessage := fmt.Sprintf("Failed to retrieve user ID")
-		respondWithError(w, http.StatusBadRequest, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			[]string{fmt.Sprintf("%s: Error: %s", baseMessage, err)},
+			[]string{baseMessage},
+		)
 		return
 	}
 
@@ -68,7 +73,12 @@ func (rs feedsResource) Create(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		baseMessage := fmt.Sprintf("Failed to create feed '%s' with URL '%s'", jsonBody.Name, jsonBody.Url)
-		respondWithError(w, http.StatusBadRequest, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			[]string{fmt.Sprintf("%s: Error: %s", baseMessage, err)},
+			[]string{baseMessage},
+		)
 		return
 	}
 	respondWithJSON(
