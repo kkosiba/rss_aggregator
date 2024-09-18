@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/kkosiba/rss_aggregator/internal/database"
 )
 
@@ -44,7 +45,7 @@ func (rs feedsResource) Create(w http.ResponseWriter, r *http.Request) {
 
 	connection := rs.database.Connect()
 
-	var userId string
+	var userId uuid.UUID
 	err = connection.QueryRow(
 		context.Background(),
 		"SELECT id FROM users WHERE api_key = $1",
@@ -56,17 +57,31 @@ func (rs feedsResource) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ID := uuid.New()
+	CreatedAt := time.Now().UTC()
+	UpdatedAt := time.Now().UTC()
+
 	_, err = connection.Query(
 		context.Background(),
-		"INSERT INTO feeds (id, created_at, updated_at, name, url, user_id) values (gen_random_uuid(), $1, $2, $3, $4, $5)",
-		time.Now().UTC(), time.Now().UTC(), jsonBody.Name, jsonBody.Url, userId,
+		"INSERT INTO feeds (id, created_at, updated_at, name, url, user_id) values ($1, $2, $3, $4, $5, $6)",
+		ID, CreatedAt, UpdatedAt, jsonBody.Name, jsonBody.Url, userId,
 	)
 	if err != nil {
 		baseMessage := fmt.Sprintf("Failed to create feed '%s' with URL '%s'", jsonBody.Name, jsonBody.Url)
 		respondWithError(w, http.StatusBadRequest, []string{fmt.Sprintf("%s: Error: %s", baseMessage, err)}, []string{baseMessage})
 		return
 	}
-	msg := fmt.Sprintf("Feed '%s' created successfully", jsonBody.Name)
-	respondWithJSON(w, http.StatusOK, map[string]string{"details": msg})
-	log.Print(msg)
+	respondWithJSON(
+		w,
+		http.StatusOK,
+		database.FeedModel{
+			ID:        ID,
+			CreatedAt: CreatedAt,
+			UpdatedAt: UpdatedAt,
+			Name:      jsonBody.Name,
+			Url:       jsonBody.Url,
+			UserId:    userId,
+		},
+	)
+	log.Printf("Feed '%s' created successfully for user ID '%s'", jsonBody.Name, userId)
 }
