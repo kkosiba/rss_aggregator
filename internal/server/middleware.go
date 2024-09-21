@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/kkosiba/rss_aggregator/internal/database"
