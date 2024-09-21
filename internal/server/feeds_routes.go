@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -20,8 +21,63 @@ type feedsResource struct {
 // Defines routes for /feeds namespace
 func (rs feedsResource) Routes() chi.Router {
 	router := chi.NewRouter()
+	router.Get("/", rs.Get)
 	router.Post("/", rs.Create)
 	return router
+}
+
+// Defines a handler for GET /feeds
+func (rs feedsResource) Get(w http.ResponseWriter, r *http.Request) {
+	connection := rs.database.Connect()
+
+	var feeds []database.FeedModel
+
+	rows, err := connection.Query(
+		context.Background(),
+		"SELECT id, created_at, updated_at, name, url, user_id FROM feeds",
+	)
+	if err != nil {
+		baseMessage := "Failed to retrieve feeds"
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			[]string{fmt.Sprintf("%s: Error: %s", baseMessage, err)},
+			[]string{baseMessage},
+		)
+		return
+	}
+	defer rows.Close()
+
+	var errors []string
+	for rows.Next() {
+		var feed database.FeedModel
+		err = rows.Scan(
+			&feed.ID,
+			&feed.CreatedAt,
+			&feed.UpdatedAt,
+			&feed.Name,
+			&feed.Url,
+			&feed.UserId,
+		)
+		if err != nil {
+			errors = append(errors, err.Error())
+			continue
+		} else {
+			feeds = append(feeds, feed)
+		}
+	}
+	if len(errors) > 0 {
+		baseMessage := "Failed to retrieve feeds"
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			[]string{fmt.Sprintf("%s: Error: %s", baseMessage, strings.Join(errors, "\n"))},
+			[]string{baseMessage},
+		)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, &feeds)
 }
 
 // Defines a handler for POST /feeds
