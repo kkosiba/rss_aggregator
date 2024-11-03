@@ -22,3 +22,11 @@ type FeedModel struct {
 	Url       string    `json:"url"`
 	UserId    uuid.UUID `json:"user_id"`
 }
+
+type FeedFollowModel struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	FeedId    uuid.UUID `json:"feed_id"`
+	UserId    uuid.UUID `json:"user_id"`
+}
