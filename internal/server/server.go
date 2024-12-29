@@ -51,6 +51,7 @@ func (server *HTTPServer) RegisterRoutes() http.Handler {
 		// Add custom API key auth middleware to /feeds endpoints
 		// todo: GET /feeds should not require authentication
 		r.With(ApiKeyAuth(server.database)).Mount("/feeds", feedsResource{database: server.database}.Routes())
+		r.With(ApiKeyAuth(server.database)).Mount("/feed_follows", feedFollowsResource{database: server.database}.Routes())
 	})
 
 	return router
